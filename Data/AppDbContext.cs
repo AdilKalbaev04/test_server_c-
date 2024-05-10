@@ -1,5 +1,3 @@
-// Data/AppDbContext.cs
-
 using CSharpCornerApi.Models;
 using Microsoft.EntityFrameworkCore;
 

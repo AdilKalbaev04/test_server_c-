@@ -1,5 +1,3 @@
-// Controllers/CSharpCornerArticlesController.cs
-
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CSharpCornerApi.Data;
