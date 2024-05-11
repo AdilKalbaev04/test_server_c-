@@ -7,6 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
+builder.Services.AddSignalR();
 builder.Services.AddDbContext<AppDbContext>(options =>
         options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 var app = builder.Build();
@@ -19,10 +20,25 @@ if (app.Environment.IsDevelopment())
 
 app.UseRouting();
 
+
+app.UseCors(builder =>
+    builder.WithOrigins("http://127.0.0.1:5500")
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials());
+
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
 });
+
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+    endpoints.MapHub<ChatHub>("/chathub");
+});
+
+
 
 var summaries = new[]
 {
