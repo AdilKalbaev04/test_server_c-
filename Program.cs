@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using AspNetCoreRateLimit;
+using ErrorHandling.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +34,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
         };
     });
+
+builder.Services.AddMemoryCache();
+builder.Services.Configure<IpRateLimitOptions>(builder.Configuration.GetSection("IpRateLimiting"));
+builder.Services.Configure<IpRateLimitPolicies>(builder.Configuration.GetSection("IpRateLimitPolicies"));
+builder.Services.AddInMemoryRateLimiting();
+builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
+
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -44,7 +54,8 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.UseMiddleware<ErrorHandlingMiddleware>();
+app.UseIpRateLimiting();
 app.UseCors(builder =>
     builder.WithOrigins("http://127.0.0.1:5500")
         .AllowAnyHeader()

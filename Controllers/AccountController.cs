@@ -34,7 +34,6 @@ public class AccountController : ControllerBase
             _logger.LogInformation("User {Email} registered.", model.Email);
             await _signInManager.SignInAsync(user, isPersistent: false);
             
-            // Добавляем запись в историю пользователя
             _context.UserHistories.Add(new UserHistory 
             { 
                 UserId = user.Id, 
@@ -58,7 +57,6 @@ public class AccountController : ControllerBase
         {
             _logger.LogInformation("User {Email} logged in.", model.Email);
             
-              // Добавляем запись в историю пользователя
             var user = await _userManager.FindByNameAsync(model.Email);
             _context.UserHistories.Add(new UserHistory 
             { 

@@ -232,3 +232,4 @@ C:\Users\Adil_root\Documents\work\tg\full_stack_c#\test_server_c#\obj\Debug\net8
 C:\Users\Adil_root\Documents\work\tg\full_stack_c#\test_server_c#\obj\Debug\net8.0\test_server_c#.pdb
 C:\Users\Adil_root\Documents\work\tg\full_stack_c#\test_server_c#\obj\Debug\net8.0\test_server_c#.genruntimeconfig.cache
 C:\Users\Adil_root\Documents\work\tg\full_stack_c#\test_server_c#\obj\Debug\net8.0\ref\test_server_c#.dll
+C:\Users\Adil_root\Documents\work\tg\full_stack_c#\test_server_c#\bin\Debug\net8.0\AspNetCoreRateLimit.dll

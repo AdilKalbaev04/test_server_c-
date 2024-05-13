@@ -1,4 +1,3 @@
-// Models/CSharpCornerArticle.cs
 
 using System;
 
