@@ -4,6 +4,11 @@ using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 using CSharpCornerApi.Data;
 using CSharpCornerApi.Models; 
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
+
 
 [Route("API/[controller]")]
 [ApiController]
@@ -14,62 +19,117 @@ public class AccountController : ControllerBase
     private readonly ILogger<AccountController> _logger;
     private readonly AppDbContext _context;
 
-    public AccountController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, ILogger<AccountController> logger, AppDbContext context)
-    {
+    private readonly RoleManager<IdentityRole> _roleManager;
+    private readonly string _jwtKey;
+
+
+public AccountController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, ILogger<AccountController> logger, AppDbContext context, RoleManager<IdentityRole> roleManager,IConfiguration configuration)
+{
         _userManager = userManager;
         _signInManager = signInManager;
         _logger = logger;
         _context = context;
+            _roleManager = roleManager; 
+                _jwtKey = configuration["Jwt:Key"]; 
+
+
     }
 
    
-    [HttpPost("register")]
-    public async Task<IActionResult> Register(UserModel model)
+[HttpPost("register")]
+public async Task<IActionResult> Register(UserModel model)
+{
+    var user = new IdentityUser { UserName = model.Email, Email = model.Email };
+    var result = await _userManager.CreateAsync(user, model.Password);
+
+    if (result.Succeeded)
     {
-        var user = new IdentityUser { UserName = model.Email, Email = model.Email };
-        var result = await _userManager.CreateAsync(user, model.Password);
-
-        if (result.Succeeded)
+        if (!await _roleManager.RoleExistsAsync("User"))
         {
-            _logger.LogInformation("User {Email} registered.", model.Email);
-            await _signInManager.SignInAsync(user, isPersistent: false);
-            
-            _context.UserHistories.Add(new UserHistory 
-            { 
-                UserId = user.Id, 
-                Action = "Registration", 
-                ActionDate = DateTime.UtcNow 
-            });
-            await _context.SaveChangesAsync();
-
-            return Ok();
+            await _roleManager.CreateAsync(new IdentityRole("User"));
         }
 
-        return BadRequest(result.Errors);
+        await _userManager.AddToRoleAsync(user, "User");
+
+        _logger.LogInformation("User {Email} registered.", model.Email);
+        await _signInManager.SignInAsync(user, isPersistent: false);
+        
+        _context.UserHistories.Add(new UserHistory 
+        { 
+            UserId = user.Id, 
+            Action = "Registration", 
+            ActionDate = DateTime.UtcNow 
+        });
+        await _context.SaveChangesAsync();
+
+        return Ok();
     }
 
-    [HttpPost("login")]
-    public async Task<IActionResult> Login(UserModel model)
+    return BadRequest(result.Errors);
+}
+
+
+  [HttpPost("login")]
+public async Task<IActionResult> Login(UserModel model)
+{
+    var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, isPersistent: false, lockoutOnFailure: false);
+
+    if (result.Succeeded)
     {
-        var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, isPersistent: false, lockoutOnFailure: false);
+        _logger.LogInformation("User {Email} logged in.", model.Email);
+        
+        var user = await _userManager.FindByNameAsync(model.Email);
+        _context.UserHistories.Add(new UserHistory 
+        { 
+            UserId = user.Id, 
+            Action = "Login", 
+            ActionDate = DateTime.UtcNow 
+        });
+        await _context.SaveChangesAsync();
 
-        if (result.Succeeded)
+        var tokenHandler = new JwtSecurityTokenHandler();
+     var key = Encoding.ASCII.GetBytes(_jwtKey);
+        var tokenDescriptor = new SecurityTokenDescriptor
         {
-            _logger.LogInformation("User {Email} logged in.", model.Email);
-            
-            var user = await _userManager.FindByNameAsync(model.Email);
-            _context.UserHistories.Add(new UserHistory 
-            { 
-                UserId = user.Id, 
-                Action = "Login", 
-                ActionDate = DateTime.UtcNow 
-            });
-            await _context.SaveChangesAsync();
+            Subject = new ClaimsIdentity(new Claim[] 
+            {
+                new Claim(ClaimTypes.Name, user.Id.ToString())
+            }),
+            Expires = DateTime.UtcNow.AddDays(7),
+            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+        };
+        var token = tokenHandler.CreateToken(tokenDescriptor);
+        var jwt = tokenHandler.WriteToken(token);
 
-            return Ok();
-        }
-
-        _logger.LogWarning("Failed login attempt for {Email}.", model.Email);
-        return Unauthorized();
+        return Ok(new { jwt });
     }
+
+    _logger.LogWarning("Failed login attempt for {Email}.", model.Email);
+    return Unauthorized();
+}
+
+[HttpPost("addAdminRole/{userId}")]
+public async Task<IActionResult> AddAdminRole(string userId)
+{
+    var user = await _userManager.FindByIdAsync(userId);
+    if (user == null)
+    {
+        return NotFound("User not found.");
+    }
+
+    if (!await _roleManager.RoleExistsAsync("Admin"))
+    {
+        await _roleManager.CreateAsync(new IdentityRole("Admin"));
+    }
+
+    var addToRoleResult = await _userManager.AddToRoleAsync(user, "Admin");
+    if (addToRoleResult.Succeeded)
+    {
+        return Ok("Role 'Admin' added to user.");
+    }
+
+    return BadRequest(addToRoleResult.Errors);
+}
+
+
 }
