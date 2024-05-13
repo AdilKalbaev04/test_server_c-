@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Adil_root\\Documents\\work\\tg\\test_server_c#\\test_server_c#.csproj": {}
+    "C:\\Users\\Adil_root\\Documents\\work\\tg\\full_stack_c#\\test_server_c#\\test_server_c#.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Adil_root\\Documents\\work\\tg\\test_server_c#\\test_server_c#.csproj": {
+    "C:\\Users\\Adil_root\\Documents\\work\\tg\\full_stack_c#\\test_server_c#\\test_server_c#.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Adil_root\\Documents\\work\\tg\\test_server_c#\\test_server_c#.csproj",
+        "projectUniqueName": "C:\\Users\\Adil_root\\Documents\\work\\tg\\full_stack_c#\\test_server_c#\\test_server_c#.csproj",
         "projectName": "test_server_c#",
-        "projectPath": "C:\\Users\\Adil_root\\Documents\\work\\tg\\test_server_c#\\test_server_c#.csproj",
+        "projectPath": "C:\\Users\\Adil_root\\Documents\\work\\tg\\full_stack_c#\\test_server_c#\\test_server_c#.csproj",
         "packagesPath": "C:\\Users\\Adil_root\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Adil_root\\Documents\\work\\tg\\test_server_c#\\obj\\",
+        "outputPath": "C:\\Users\\Adil_root\\Documents\\work\\tg\\full_stack_c#\\test_server_c#\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Adil_root\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -43,6 +43,14 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "Microsoft.AspNetCore.Authentication.JwtBearer": {
+              "target": "Package",
+              "version": "[8.0.4, )"
+            },
+            "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[8.0.4, )"
+            },
             "Microsoft.AspNetCore.OpenApi": {
               "target": "Package",
               "version": "[8.0.4, )"
