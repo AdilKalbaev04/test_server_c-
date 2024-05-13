@@ -12,5 +12,6 @@ public class AppDbContext : IdentityDbContext<IdentityUser>
     }
 
         public DbSet<CSharpCornerArticle> Articles { get; set; }
+         public DbSet<UserHistory> UserHistories { get; set; }
     }
 }
