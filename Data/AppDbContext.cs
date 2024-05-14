@@ -13,7 +13,7 @@ namespace CSharpCornerApi.Data
 
         public DbSet<CSharpCornerArticle> Articles { get; set; }
         public DbSet<UserHistory> UserHistories { get; set; }
-        public DbSet<Invoice> Invoices { get; set; } // Добавьте это
-        public DbSet<Transaction> Transactions { get; set; } // и это
+        public DbSet<Invoice> Invoices { get; set; } 
+        public DbSet<Transaction> Transactions { get; set; } 
     }
 }

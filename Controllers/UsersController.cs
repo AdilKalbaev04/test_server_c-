@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -9,12 +10,13 @@ using System.Threading.Tasks;
 public class UsersController : ControllerBase
 {
     private readonly UserManager<IdentityUser> _userManager;
+    private readonly ILogger<UsersController> _logger; 
 
-    public UsersController(UserManager<IdentityUser> userManager)
+    public UsersController(UserManager<IdentityUser> userManager, ILogger<UsersController> logger) 
     {
         _userManager = userManager;
+        _logger = logger; 
     }
-
     [HttpGet]
     public async Task<ActionResult<IEnumerable<IdentityUser>>> GetUsers()
     {
@@ -46,29 +48,33 @@ public class UsersController : ControllerBase
 
         if (!result.Succeeded)
         {
-            return BadRequest(result.Errors);
+            BadRequest(string.Join(", ", result.Errors.Select(e => e.Description)));
         }
+
+          _logger.LogInformation("User updated: {Id}", id);
 
         return NoContent();
     }
 
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteUser(string id)
+  [HttpDelete("{id}")]
+public async Task<IActionResult> DeleteUser(string id)
+{
+    var user = await _userManager.FindByIdAsync(id);
+
+    if (user == null)
     {
-        var user = await _userManager.FindByIdAsync(id);
-
-        if (user == null)
-        {
-            return NotFound();
-        }
-
-        var result = await _userManager.DeleteAsync(user);
-
-        if (!result.Succeeded)
-        {
-            return BadRequest(result.Errors);
-        }
-
-        return NoContent();
+        return NotFound();
     }
+
+    var result = await _userManager.DeleteAsync(user);
+
+    if (!result.Succeeded)
+    {
+        return BadRequest(string.Join(", ", result.Errors.Select(e => e.Description)));
+    }
+    
+    _logger.LogInformation("User deleted: {Id}", id); 
+    return NoContent();
+}
+
 }

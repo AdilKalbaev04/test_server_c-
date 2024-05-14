@@ -1,6 +1,11 @@
 using CSharpCornerApi.Data;
 using CSharpCornerApi.Models;
 using System.Threading.Tasks;
+   public interface IBillingService 
+{
+    Task<Invoice> CreateInvoice(Invoice invoice);
+    Task<Transaction> ProcessPayment(Transaction transaction);
+}
 
 public class BillingService : IBillingService 
 {

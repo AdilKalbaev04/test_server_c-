@@ -39,6 +39,11 @@ public AccountController(UserManager<IdentityUser> userManager, SignInManager<Id
 [HttpPost("register")]
 public async Task<IActionResult> Register(UserModel model)
 {
+
+     if (!ModelState.IsValid)
+    {
+        return BadRequest(ModelState);
+    }
     var user = new IdentityUser { UserName = model.Email, Email = model.Email };
     var result = await _userManager.CreateAsync(user, model.Password);
 
@@ -65,7 +70,7 @@ public async Task<IActionResult> Register(UserModel model)
         return Ok();
     }
 
-    return BadRequest(result.Errors);
+    return BadRequest(string.Join(", ", result.Errors.Select(e => e.Description)));
 }
 
 
@@ -128,8 +133,30 @@ public async Task<IActionResult> AddAdminRole(string userId)
         return Ok("Role 'Admin' added to user.");
     }
 
-    return BadRequest(addToRoleResult.Errors);
+    return BadRequest(string.Join(", ", addToRoleResult.Errors.Select(e => e.Description)));
 }
 
+[HttpPost("addRole/{userId}/{role}")]
+public async Task<IActionResult> AddRoleToUser(string userId, string role)
+{
+    var user = await _userManager.FindByIdAsync(userId);
+    if (user == null)
+    {
+        return NotFound("User not found.");
+    }
+
+    if (!await _roleManager.RoleExistsAsync(role))
+    {
+        await _roleManager.CreateAsync(new IdentityRole(role));
+    }
+
+    var addToRoleResult = await _userManager.AddToRoleAsync(user, role);
+    if (addToRoleResult.Succeeded)
+    {
+        return Ok($"Role '{role}' added to user.");
+    }
+
+    return BadRequest(string.Join(", ", addToRoleResult.Errors.Select(e => e.Description)));
+}
 
 }
