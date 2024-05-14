@@ -9,21 +9,22 @@ using System.Threading.Tasks;
         Task<List<Invoice>> GetInvoicesForUser(string userId);
 
 }
-
 public class BillingService : IBillingService 
 {
    private readonly AppDbContext _context;
+   private readonly IEmailService _emailService; 
 
-   public BillingService(AppDbContext context)
+   public BillingService(AppDbContext context, IEmailService emailService) 
    {
        _context = context;
+       _emailService = emailService; 
    }
-
 public async Task<Invoice> CreateInvoice(Invoice invoice)
 {
    invoice.CreatedDate = invoice.CreatedDate.ToUniversalTime();
    _context.Invoices.Add(invoice);
    await _context.SaveChangesAsync();
+     await _emailService.SendEmailAsync(invoice.UserId, "New Invoice Created", $"A new invoice with ID {invoice.Id} has been created.");
    return invoice;
 }
 
@@ -40,6 +41,7 @@ public async Task<Transaction> ProcessPayment(Transaction transaction)
    transaction.TransactionDate = transaction.TransactionDate.ToUniversalTime();
    _context.Transactions.Add(transaction);
    await _context.SaveChangesAsync();
+   
    return transaction;
 }
 
