@@ -76,5 +76,4 @@ public async Task<IActionResult> DeleteUser(string id)
     _logger.LogInformation("User deleted: {Id}", id); 
     return NoContent();
 }
-
 }

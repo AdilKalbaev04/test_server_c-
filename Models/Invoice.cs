@@ -8,5 +8,6 @@ public class Invoice
     public string Description { get; set; }
     public decimal Amount { get; set; }
     public DateTime CreatedDate { get; set; }
+    public string UserId { get; set; }
 }
 }

@@ -1,10 +1,13 @@
 using CSharpCornerApi.Data;
 using CSharpCornerApi.Models;
+using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
    public interface IBillingService 
 {
     Task<Invoice> CreateInvoice(Invoice invoice);
     Task<Transaction> ProcessPayment(Transaction transaction);
+        Task<List<Invoice>> GetInvoicesForUser(string userId);
+
 }
 
 public class BillingService : IBillingService 
@@ -39,5 +42,10 @@ public async Task<Transaction> ProcessPayment(Transaction transaction)
    await _context.SaveChangesAsync();
    return transaction;
 }
+
+public async Task<List<Invoice>> GetInvoicesForUser(string userId)
+   {
+       return await _context.Invoices.Where(invoice => invoice.UserId == userId).ToListAsync();
+   }
 
 }
